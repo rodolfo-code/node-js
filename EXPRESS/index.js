@@ -29,6 +29,10 @@ app.get('/ola/:nome/:empresa', (req, res) => {
   res.send(`<h1>Oi ${nome} ${empresa}</h1>`);
 });
 
+app.get('/test', (req, res) => {
+  res.send('Teste concluido');
+});
+
 app.listen(4000, (erro) => {
   if (erro) {
     console.log('Ocorreu um erro');
