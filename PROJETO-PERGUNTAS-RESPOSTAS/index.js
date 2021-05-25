@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const connection = require('./database/database');
+const Pergunta = require('./database/pergunta');
 
 connection
   .authenticate()
@@ -28,9 +29,15 @@ app.get('/perguntar', (req, res) => {
 });
 
 app.post('/salvarPergunta', (req, res) => {
-  const titulo = req.body.titulo;
-  const descricao = req.body.descricao;
-  res.send(`Formulário recebido! titulo: ${titulo}, descricao: ${descricao}`);
+  const { titulo, descricao } = req.body;
+  // o metodo create equivale ao INSERT INTO...
+  // pergunta é a tabela
+  Pergunta.create({
+    titulo: titulo,
+    descricao: descricao,
+  }).then(() => {
+    res.redirect('/');
+  });
 });
 
 app.listen(8080, () => {
