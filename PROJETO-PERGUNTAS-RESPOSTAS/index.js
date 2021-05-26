@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const connection = require('./database/database');
 const Pergunta = require('./database/pergunta');
+const Resposta = require('./database/Resposta');
 
 connection
   .authenticate()
@@ -21,7 +22,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-  res.render('index.ejs');
+  // metodo findAll equivale a SELECT * FROM tabela
+  Pergunta.findAll({ raw: true, order: [['id', 'DESC']] }).then((perguntas) => {
+    res.render('index.ejs', {
+      perguntas: perguntas,
+    });
+  });
 });
 
 app.get('/perguntar', (req, res) => {
@@ -37,6 +43,31 @@ app.post('/salvarPergunta', (req, res) => {
     descricao: descricao,
   }).then(() => {
     res.redirect('/');
+  });
+});
+
+app.get('/pergunta/:id', (req, res) => {
+  const { id } = req.params;
+  Pergunta.findOne({
+    where: { id: id },
+  }).then((pergunta) => {
+    if (pergunta) {
+      res.render('pergunta', {
+        pergunta: pergunta,
+      });
+    } else {
+      res.redirect('/');
+    }
+  });
+});
+
+app.post('/responder', (req, res) => {
+  const { corpo, pergunta } = req.body;
+  Resposta.create({
+    corpo: corpo,
+    perguntaId: pergunta,
+  }).then(() => {
+    res.redirect(`/pergunta/${perguntaId}`);
   });
 });
 
