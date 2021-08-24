@@ -1,9 +1,9 @@
-import {Router} from 'express'
+import itemRouter from "./routeItems"
+import locationsRouter from './routeLocations'
 
-const router = Router()
+const Router = {
+  itemRouter,
+  locationsRouter
+}
 
-router.get('/', (req, res) => {
-  return res.json({message: 'Ola dev'})
-})
-
-export default router
+export default Router
