@@ -4,8 +4,11 @@ import { celebrate, Joi } from 'celebrate'
 
 import multerCongif from '../config/multer';
 import connection from '../database/connection';
+import isAuthenticated from '../middlewares/isAuthenticated';
 
 const locationsRouter = Router()
+
+locationsRouter.use(isAuthenticated)
 
 const validateData = () => celebrate( {
   body: Joi.object().keys({
