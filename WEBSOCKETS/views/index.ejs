@@ -6,10 +6,47 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+
+
 </head>
 
 <body>
   <h1>Teste</h1>
+  <input type="text" name="usuario_rodolfo" id="palavra">
+  <button onclick="enviar()">Enviar</button>
+
+  <hr>
+  <p id="resultado"></p>
 </body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+<script>
+  const socket = io('http://localhost:3000')
+  socket.on('disconnect', () => {
+    console.log('desconectado')
+  })
+
+  const enviar = () => {
+    const input = document.getElementById('palavra')
+
+    socket.emit('usuario1', {
+      inputValue: input.value
+    })
+  }
+
+  const paragrafo = document.getElementById('resultado')
+
+  socket.on('resultado', (data) => {
+    console.log(data)
+    paragrafo.innerHTML = data
+  })
+
+  // const receber = () => {
+
+
+  // }
+
+  // receber()
+</script>
 
 </html>
