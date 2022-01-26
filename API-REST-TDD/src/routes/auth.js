@@ -1,3 +1,4 @@
+const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt-nodejs');
 const validationError = require('../errors/validationError');
@@ -7,7 +8,9 @@ const secret = 'segredosupersecreto';
 // const decode = (token) => jwt.verify(token, secret);
 
 module.exports = (app) => {
-  const signin = (req, res, next) => {
+  const router = express.Router();
+
+  router.post('/signin', (req, res, next) => {
     const { email, passwd } = req.body;
     app.services.userServices
       .findOne({ email })
@@ -27,7 +30,17 @@ module.exports = (app) => {
         throw new validationError('Usuário ou senha inválidos');
       })
       .catch((err) => next(err));
-  };
+  });
 
-  return { signin };
+  router.post('/signup', async (req, res, next) => {
+    try {
+      const result = await app.services.userServices.save(req.body);
+
+      return res.status(201).json(result[0]);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  return router;
 };

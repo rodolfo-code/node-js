@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const app = require('../../src/app');
 
-const MAIN_ROUTE = '/accounts';
+const MAIN_ROUTE = '/v1/accounts';
 
 const name = chance.name({ middle: true });
 const secret = 'segredosupersecreto';

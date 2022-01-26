@@ -4,6 +4,8 @@ const chance = require('chance').Chance();
 
 const app = require('../../src/app');
 
+const MAIN_ROUTE = '/v1/users';
+
 const email = chance.email({ domain: 'gmail.com' });
 const name = chance.name({ middle: true });
 const secret = 'segredosupersecreto';
@@ -24,7 +26,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Deve listar todos os usuários', () => {
     return request(app)
-      .get('/users')
+      .get(MAIN_ROUTE)
       .set('authorization', `bearer ${user.token}`)
       .then((res) => {
         expect(res.status).toBe(200);
@@ -34,7 +36,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Deve inserir usuário com sucesso', () => {
     return request(app)
-      .post('/users')
+      .post(MAIN_ROUTE)
       .send({
         name: 'Walter Mitty',
         email,
@@ -50,7 +52,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Deve armazenar senha criptografada', async () => {
     const res = await request(app)
-      .post('/users')
+      .post(MAIN_ROUTE)
       .send({
         name: 'Walter Mitty',
         email: `${Date.now()}@gmail.com`,
@@ -67,7 +69,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Não deve inserir usuário sem nome', () => {
     return request(app)
-      .post('/users')
+      .post(MAIN_ROUTE)
       .send({
         email,
         passwd: '123456',
@@ -81,7 +83,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Não deve inserir usuário sem email', async () => {
     const result = await request(app)
-      .post('/users')
+      .post(MAIN_ROUTE)
       .send({ name, passwd: '123456' })
       .set('authorization', `bearer ${user.token}`);
 
@@ -91,7 +93,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Não deve inserir usuário sem senha', (done) => {
     request(app)
-      .post('/users')
+      .post(MAIN_ROUTE)
       .send({ name, email })
       .set('authorization', `bearer ${user.token}`)
       .then((res) => {
@@ -103,7 +105,7 @@ describe('Testes de rotas de usuário!', () => {
 
   test('Não deve inserir usuário com email existente', () => {
     return request(app)
-      .post('/users')
+      .post(MAIN_ROUTE)
       .send({
         name,
         email,
