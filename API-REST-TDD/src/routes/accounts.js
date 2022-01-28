@@ -5,16 +5,16 @@ module.exports = (app) => {
 
   router.post('/', (req, res, next) => {
     app.services.accountServices
-      .save(req.body)
+      .save({ ...req.body, user_id: req.user.id })
       .then((result) => {
         return res.status(201).json(result[0]);
       })
       .catch((err) => next(err));
   });
 
-  router.get('/', (req, res, next) => {
+  router.get('/', async (req, res, next) => {
     app.services.accountServices
-      .findAll()
+      .findAll(req.user.id)
       .then((result) => {
         res.status(200).json(result);
       })

@@ -1,6 +1,7 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const chance = require('chance').Chance();
+const knex = require('knex');
 
 const app = require('../../src/app');
 
@@ -13,6 +14,10 @@ const secret = 'segredosupersecreto';
 let user;
 
 describe('Testes de rotas de usuário!', () => {
+  beforeAll(() => {
+    return app.db.raw('TRUNCATE TABLE users CASCADE');
+  });
+
   beforeAll(async () => {
     const res = await app.services.userServices.save({
       name,

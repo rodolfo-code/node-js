@@ -6,6 +6,10 @@ const chance = require('chance').Chance();
 const name = chance.name({ middle: true });
 
 describe('Testes de autenticação de usuários', () => {
+  beforeAll(() => {
+    return app.db.raw('TRUNCATE TABLE users CASCADE');
+  });
+
   test('Deve criar usuário via signup', () => {
     const email = chance.email();
     return request
