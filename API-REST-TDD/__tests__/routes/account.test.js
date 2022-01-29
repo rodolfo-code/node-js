@@ -58,7 +58,21 @@ describe('Testes de rotas de contas', () => {
       });
   });
 
-  test.skip('Não deve inserir conta com nome já existente para o mesmo usuário', () => {});
+  test('Não deve inserir conta com nome já existente para o mesmo usuário', () => {
+    return app
+      .db('accounts')
+      .insert({ name: 'Acc duplicada', user_id: user.id })
+      .then(() =>
+        request(app)
+          .post(MAIN_ROUTE)
+          .send({ name: 'Acc duplicada', user_id: user.id })
+          .set('authorization', `bearer ${user.token}`),
+      )
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('Esta nome de conta já está existe');
+      });
+  });
 
   test('Deve listar apenas contas do usuário', () => {
     return app
@@ -73,7 +87,6 @@ describe('Testes de rotas de contas', () => {
           .set('authorization', `bearer ${user.token}`),
       )
       .then((res) => {
-        // console.log(res.body);
         expect(res.status).toBe(200);
         // expect(res.body.length).toBe(1);
         expect(res.body[0].name).toBe('Acc User #1');
@@ -105,7 +118,22 @@ describe('Testes de rotas de contas', () => {
       });
   });
 
-  test.skip('Não deve retornar uma conta de outro usuário', () => {});
+  test('Não deve retornar uma conta de outro usuário', () => {
+    return app
+      .db('accounts')
+      .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+      .then((acc) =>
+        request(app)
+          .get(`${MAIN_ROUTE}/${acc[0].id}`)
+          .set('authorization', `bearer ${user.token}`),
+      )
+      .then((res) => {
+        expect(res.status).toBe(403);
+        expect(res.body.error).toBe(
+          'Você nao tem credenciais necessárias para acessar esse recurso',
+        );
+      });
+  });
 
   test('Deve alterar uma conta', () => {
     return app
@@ -124,6 +152,24 @@ describe('Testes de rotas de contas', () => {
       });
   });
 
+  test('Não deve alterar um conta de outro usuário', () => {
+    return app
+      .db('accounts')
+      .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+      .then((acc) => {
+        return request(app)
+          .put(`${MAIN_ROUTE}/${acc[0].id}`)
+          .send({ name: 'Acc User #1' })
+          .set('authorization', `bearer ${user.token}`);
+      })
+      .then((res) => {
+        expect(res.status).toBe(403);
+        expect(res.body.error).toBe(
+          'Você nao tem credenciais necessárias para acessar esse recurso',
+        );
+      });
+  });
+
   test('Deve remover uma conta', () => {
     return app
       .db('accounts')
@@ -135,6 +181,23 @@ describe('Testes de rotas de contas', () => {
       )
       .then((res) => {
         expect(res.status).toBe(204);
+      });
+  });
+
+  test('Não deve remover uma conta de outro usuário', () => {
+    return app
+      .db('accounts')
+      .insert({ name: 'Acc To Remove #2', user_id: user2.id }, ['id'])
+      .then((acc) =>
+        request(app)
+          .delete(`${MAIN_ROUTE}/${acc[0].id}`)
+          .set('authorization', `bearer ${user.token}`),
+      )
+      .then((res) => {
+        expect(res.status).toBe(403);
+        expect(res.body.error).toBe(
+          'Você nao tem credenciais necessárias para acessar esse recurso',
+        );
       });
   });
 });

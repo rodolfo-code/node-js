@@ -1,13 +1,30 @@
 const express = require('express');
+const recursoIndevidoError = require('../errors/recursoIndevidoError');
 
 module.exports = (app) => {
   const router = express.Router();
+
+  router.param('id', async (req, res, next) => {
+    const { id } = req.user;
+    app.services.accountServices
+      .findById({
+        id: req.params.id,
+      })
+      .then(({ user_id }) => {
+        if (id !== user_id) {
+          throw new recursoIndevidoError();
+        }
+
+        next();
+      })
+      .catch((err) => next(err));
+  });
 
   router.post('/', (req, res, next) => {
     app.services.accountServices
       .save({ ...req.body, user_id: req.user.id })
       .then((result) => {
-        return res.status(201).json(result[0]);
+        res.status(201).json(result[0]);
       })
       .catch((err) => next(err));
   });
