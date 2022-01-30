@@ -114,4 +114,108 @@ describe('Teste de rotas de transações', () => {
         expect(res.body[0].acc_id).toBe(accUser.id);
       });
   });
+
+  test('Deve retornar uma transação por ID', () => {
+    return app
+      .db('transactions')
+      .insert(
+        {
+          description: 'T ID',
+          date: new Date(),
+          ammount: 100,
+          type: 'I',
+          acc_id: accUser.id,
+        },
+        '*',
+      )
+      .then((trans) =>
+        request(app)
+          .get(`${MAIN_ROUTE}/${trans[0].id}`)
+          .set('authorization', `bearer ${user.token}`)
+          .then((res) => {
+            expect(res.status).toBe(200);
+            expect(res.body.id).toBe(trans[0].id);
+            expect(res.body.description).toBe('T ID');
+          }),
+      );
+  });
+
+  test('Deve alterar uma transação por ID', () => {
+    return app
+      .db('transactions')
+      .insert(
+        {
+          description: 'T Alterar',
+          date: new Date(),
+          ammount: 100,
+          type: 'I',
+          acc_id: accUser.id,
+        },
+        '*',
+      )
+      .then((trans) =>
+        request(app)
+          .put(`${MAIN_ROUTE}/${trans[0].id}`)
+          .send({
+            description: 'T Alterado',
+            ammount: 300,
+          })
+          .set('authorization', `bearer ${user.token}`)
+          .then((res) => {
+            expect(res.status).toBe(200);
+            expect(res.body.description).toBe('T Alterado');
+            expect(res.body.ammount).toBe('300.00');
+          }),
+      );
+  });
+
+  test('Deve remover uma transação', () => {
+    return app
+      .db('transactions')
+      .insert(
+        {
+          description: 'T Deletar',
+          date: new Date(),
+          ammount: 100,
+          type: 'I',
+          acc_id: accUser.id,
+        },
+        '*',
+      )
+      .then((trans) => {
+        return request(app)
+          .delete(`${MAIN_ROUTE}/${trans[0].id}`)
+          .set('authorization', `bearer ${user.token}`)
+          .then((res) => {
+            expect(res.status).toBe(204);
+            // expect(res.body).toBe();
+          });
+      });
+  });
+
+  test('Não deve remover uma transação de outro usuário', () => {
+    return app
+      .db('transactions')
+      .insert(
+        {
+          description: 'T Deletar',
+          date: new Date(),
+          ammount: 100,
+          type: 'I',
+          acc_id: accUser2.id,
+        },
+        '*',
+      )
+      .then((trans) => {
+        return request(app)
+          .delete(`${MAIN_ROUTE}/${trans[0].id}`)
+          .set('authorization', `bearer ${user.token}`)
+          .then((res) => {
+            expect(res.status).toBe(403);
+            expect(res.body.error).toBe(
+              'Você nao tem credenciais necessárias para acessar esse recurso',
+            );
+          });
+      });
+  });
 });

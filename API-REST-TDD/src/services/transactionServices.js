@@ -12,5 +12,17 @@ module.exports = (app) => {
     return app.db('transactions').insert(newTransaction, '*');
   };
 
-  return { find, save };
+  const findOne = (filter) => {
+    return app.db('transactions').where(filter).first();
+  };
+
+  const update = (id, trans) => {
+    return app.db('transactions').where({ id }).update(trans, '*');
+  };
+
+  const remove = (id) => {
+    return app.db('transactions').where({ id }).del();
+  };
+
+  return { find, save, findOne, update, remove };
 };
