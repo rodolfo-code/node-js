@@ -112,8 +112,67 @@ describe('Teste de rotas de transações', () => {
       .then((res) => {
         expect(res.status).toBe(201);
         expect(res.body[0].acc_id).toBe(accUser.id);
+        expect(res.body[0].ammount).toBe('100.00');
       });
   });
+
+  test('Transações de entrada devem ser positivas', () => {
+    return request(app)
+      .post(MAIN_ROUTE)
+      .set('authorization', `bearer ${user.token}`)
+      .send({
+        description: 'New T',
+        date: new Date(),
+        ammount: -100,
+        type: 'I',
+        acc_id: accUser.id,
+      })
+      .then((res) => {
+        expect(res.status).toBe(201);
+        expect(res.body[0].acc_id).toBe(accUser.id);
+        expect(res.body[0].ammount).toBe('100.00');
+      });
+  });
+
+  test('Transações de saida devem ser negativas', () => {
+    return request(app)
+      .post(MAIN_ROUTE)
+      .set('authorization', `bearer ${user.token}`)
+      .send({
+        description: 'New T',
+        date: new Date(),
+        ammount: 100,
+        type: 'O',
+        acc_id: accUser.id,
+      })
+      .then((res) => {
+        expect(res.status).toBe(201);
+        expect(res.body[0].acc_id).toBe(accUser.id);
+        expect(res.body[0].ammount).toBe('-100.00');
+      });
+  });
+
+  test('Não deve inserir uma transação sem descrição', () => {
+    return request(app)
+      .post(MAIN_ROUTE)
+      .set('authorization', `bearer ${user.token}`)
+      .send({
+        date: new Date(),
+        ammount: 100,
+        type: 'O',
+        acc_id: accUser.id,
+      })
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('Descrição é um atributo obrigatório');
+      });
+  });
+
+  test.skip('Não deve inserir uma transação sem valor', () => {});
+  test.skip('Não deve inserir uma transação sem data', () => {});
+  test.skip('Não deve inserir uma transação sem conta', () => {});
+  test.skip('Não deve inserir uma transação sem tipo', () => {});
+  test.skip('Não deve inserir uma transação com tipo inválido', () => {});
 
   test('Deve retornar uma transação por ID', () => {
     return app

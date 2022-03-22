@@ -1,3 +1,5 @@
+const ValidationError = require('../errors/validationError');
+
 module.exports = (app) => {
   const find = (userId, filter = {}) => {
     return app
@@ -8,7 +10,18 @@ module.exports = (app) => {
       .select();
   };
 
-  const save = (newTransaction) => {
+  const save = (transaction) => {
+    if (!transaction.description)
+      throw new ValidationError('Descrição é um atributo obrigatório');
+
+    const newTransaction = { ...transaction };
+    if (
+      (transaction.type === 'I' && transaction.ammount < 0) ||
+      (transaction.type === 'O' && transaction.ammount > 0)
+    ) {
+      newTransaction.ammount *= -1;
+    }
+
     return app.db('transactions').insert(newTransaction, '*');
   };
 
